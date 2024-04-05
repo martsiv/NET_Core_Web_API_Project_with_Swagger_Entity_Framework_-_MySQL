@@ -1,0 +1,1 @@
+# NET Core Web API Project with Swagger, Entity Framework & MySQL
