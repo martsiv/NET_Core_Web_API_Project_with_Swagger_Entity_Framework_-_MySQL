@@ -55,7 +55,7 @@ namespace WebApp
 			app.MapGet("/api/students/", async (IStudentService studentService) =>
 			{
 				var students = studentService.GetAllStudents();
-				return Results.Json(new { students });
+				return Results.Json(students);
 			});
 			app.MapGet("/api/students/{id:int}", async (int id, IStudentService studentService) =>
 			{
@@ -90,7 +90,7 @@ namespace WebApp
 			app.MapGet("/api/teachers/", async (ITeacherService teacherService) =>
 			{
 				var teachers = teacherService.GetAllTeachers();
-				return Results.Json(new { teachers });
+				return Results.Json(teachers);
 			});
 			app.MapGet("/api/teachers/{id:int}", async (int id, ITeacherService teacherService) =>
 			{
@@ -125,7 +125,7 @@ namespace WebApp
 			app.MapGet("/api/courses/", async (ICourseService courseService) =>
 			{
 				var courses = courseService.GetAllCourses();
-				return Results.Json(new { courses });
+				return Results.Json(courses);
 			});
 			app.MapGet("/api/courses/{id:int}", async (int id, ICourseService courseService) =>
 			{
@@ -157,13 +157,6 @@ namespace WebApp
 			});
 
 			// Course-Students
-			app.MapPost("/api/courses/{courseId:int}/students/{studentId:int}", async ([FromRoute] int courseId, [FromRoute] int studentId, [FromServices] ICourseStudentService courseStudentService, IMapper mapper) =>
-			{
-				var courseStudent = new CourseStudentDto() { CourseId = courseId, StudentId = studentId };
-				courseStudentService.AddCourseStudent(courseStudent);
-				return courseStudent;
-			});
-
 			app.MapGet("/api/courses/{courseId:int}/students", async (int courseId, IStudentService studentService) =>
 			{
 				var students = studentService.GetStudentsByCourse(courseId);
@@ -178,6 +171,19 @@ namespace WebApp
 				if (courses.Count() == 0)
 					return Results.NotFound(new { message = "No items were found matching the given search criteria." });
 				return Results.Json(courses);
+			});
+			
+			app.MapGet("/api/courses/{courseId:int}/students/{studentId:int}", async ([FromRoute] int courseId, [FromRoute] int studentId, [FromServices] ICourseStudentService courseStudentService) =>
+			{
+				var entity = courseStudentService.GetCourseStudentByIds(courseId, studentId);
+				return Results.Json(entity);
+			});
+
+			app.MapPost("/api/courses/{courseId:int}/students/{studentId:int}", async ([FromRoute] int courseId, [FromRoute] int studentId, [FromServices] ICourseStudentService courseStudentService, IMapper mapper) =>
+			{
+				var courseStudent = new CourseStudentDto() { CourseId = courseId, StudentId = studentId };
+				courseStudentService.AddCourseStudent(courseStudent);
+				return courseStudent;
 			});
 
 			app.MapDelete("/api/courses/{courseId:int}/students/{studentId:int}", async ([FromRoute] int courseId, [FromRoute] int studentId, [FromServices] ICourseStudentService courseStudentService) =>
