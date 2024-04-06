@@ -1,6 +1,7 @@
 ﻿using ApplicationCore.DTOs;
 using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
+using ApplicationCore.Specifications;
 using AutoMapper;
 
 namespace ApplicationCore.Services
@@ -15,24 +16,24 @@ namespace ApplicationCore.Services
 			this._mapper = mapper;
 			this._teachersRepo = teachersRepo;
 		}
-		public void AddTeacher(TeacherDto teacher)
+		public void AddTeacher(CreateTeacherDto teacher)
 		{
 			var entity = _mapper.Map<Teacher>(teacher);
 			_teachersRepo.Insert(entity);
 			_teachersRepo.Save();
 		}
 
-		public IEnumerable<TeacherDto> GetAllTeachers()
+		public IEnumerable<TeacherViewDto> GetAllTeachers()
 		{
-			var entities = _teachersRepo.GetAll();
-			return _mapper.Map<IEnumerable<TeacherDto>>(entities);
+			var entities = _teachersRepo.GetListBySpec(new TeacherSpecs.All());
+			return _mapper.Map<IEnumerable<TeacherViewDto>>(entities);
 		}
 
-		public TeacherDto? GetTeacherById(int teacherId)
+		public TeacherViewDto? GetTeacherById(int teacherId)
 		{
-			var entity = _teachersRepo.GetByID(teacherId);
+			var entity = _teachersRepo.GetItemBySpec(new TeacherSpecs.ById(teacherId));
 			if (entity == null) return null;
-			return _mapper.Map<TeacherDto>(entity);
+			return _mapper.Map<TeacherViewDto>(entity);
 		}
 
 		public void RemoveTeacher(int teacherId)

@@ -3,7 +3,6 @@ using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
 using ApplicationCore.Specifications;
 using AutoMapper;
-using static ApplicationCore.Specifications.StudentSpecs;
 
 namespace ApplicationCore.Services
 {
@@ -17,24 +16,24 @@ namespace ApplicationCore.Services
 			this._mapper = mapper;
 			this._studentsRepo = studentRepo;
 		}
-		public void AddStudent(StudentDto student)
+		public void AddStudent(CreateStudentDto student)
 		{
 			var entity = _mapper.Map<Student>(student);
 			_studentsRepo.Insert(entity);
 			_studentsRepo.Save();
 		}
 
-		public IEnumerable<StudentDto> GetAllStudents()
+		public IEnumerable<StudentViewDto> GetAllStudents()
 		{
-			var entities = _studentsRepo.GetAll();
-			return _mapper.Map<IEnumerable<StudentDto>>(entities);
+			var entities = _studentsRepo.GetListBySpec(new StudentSpecs.All());
+			return _mapper.Map<IEnumerable<StudentViewDto>>(entities);
 		}
 
-		public StudentDto? GetStudentById(int studentId)
+		public StudentViewDto? GetStudentById(int studentId)
 		{
-			var entity = _studentsRepo.GetByID(studentId);
+			var entity = _studentsRepo.GetItemBySpec(new StudentSpecs.ById(studentId));
 			if (entity == null) return null;
-			return _mapper.Map<StudentDto>(entity);
+			return _mapper.Map<StudentViewDto>(entity);
 		}
 
 		public IEnumerable<StudentDto> GetStudentsByCourse(int courseId)

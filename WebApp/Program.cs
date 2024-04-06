@@ -64,9 +64,9 @@ namespace WebApp
 					return Results.NotFound(new { message = "Student not found" });
 				return Results.Json(student);
 			});
-			app.MapPost("/api/students/", async ([FromBody] CreateStudentDto student, IStudentService studentService, IMapper mapper) =>
+			app.MapPost("/api/students/", async ([FromBody] CreateStudentDto student, IStudentService studentService) =>
 			{
-				studentService.AddStudent(mapper.Map<StudentDto>(student));
+				studentService.AddStudent(student);
 				return student;
 			});
 			app.MapPut("/api/students", async ([FromBody] StudentDto studentDto, IStudentService studentService) =>
@@ -99,9 +99,9 @@ namespace WebApp
 					return Results.NotFound(new { message = "Teacher not found" });
 				return Results.Json(teacher);
 			});
-			app.MapPost("/api/teachers/", async ([FromBody] CreateTeacherDto teacher, ITeacherService teacherService, IMapper mapper) =>
+			app.MapPost("/api/teachers/", async ([FromBody] CreateTeacherDto teacher, ITeacherService teacherService) =>
 			{
-				teacherService.AddTeacher(mapper.Map<TeacherDto>(teacher));
+				teacherService.AddTeacher(teacher);
 				return teacher;
 			});
 			app.MapPut("/api/teachers", async ([FromBody] TeacherDto teacherDto, ITeacherService teacherService) =>
@@ -134,9 +134,9 @@ namespace WebApp
 					return Results.NotFound(new { message = "Course not found" });
 				return Results.Json(course);
 			});
-			app.MapPost("/api/courses/", async ([FromBody] CreateCourseDto course, ICourseService courseService, IMapper mapper) =>
+			app.MapPost("/api/courses/", async ([FromBody] CreateCourseDto course, ICourseService courseService) =>
 			{
-				courseService.AddCourse(mapper.Map<CourseDto>(course));
+				courseService.AddCourse(course);
 				return course;
 			});
 			app.MapPut("/api/courses", async ([FromBody] CourseDto courseDto, ICourseService courseService) =>
@@ -172,7 +172,15 @@ namespace WebApp
 					return Results.NotFound(new { message = "No items were found matching the given search criteria." });
 				return Results.Json(courses);
 			});
-			
+
+			app.MapGet("/api/teacher/{teacherId:int}/courses", async (int teacherId, ICourseService courseService) =>
+			{
+				var courses = courseService.GetCoursesByTeacher(teacherId);
+				if (courses.Count() == 0)
+					return Results.NotFound(new { message = "No items were found matching the given search criteria." });
+				return Results.Json(courses);
+			});
+
 			app.MapGet("/api/courses/{courseId:int}/students/{studentId:int}", async ([FromRoute] int courseId, [FromRoute] int studentId, [FromServices] ICourseStudentService courseStudentService) =>
 			{
 				var entity = courseStudentService.GetCourseStudentByIds(courseId, studentId);

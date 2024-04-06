@@ -4,11 +4,12 @@ namespace ApplicationCore.Interfaces
 {
 	public interface ICourseService
 	{
-		void AddCourse(CourseDto course);
+		void AddCourse(CreateCourseDto course);
 		void RemoveCourse(int courseId);
 		void UpdateCourse(int courseId, CourseDto course);
-		IEnumerable<CourseDto> GetAllCourses();
+		IEnumerable<CourseViewDto> GetAllCourses();
 		IEnumerable<CourseDto> GetCoursesByStudent(int studentId);
-		CourseDto? GetCourseById(int courseId);
+		IEnumerable<CourseDto> GetCoursesByTeacher(int teacherId);
+		CourseViewDto? GetCourseById(int courseId);
 	}
 }

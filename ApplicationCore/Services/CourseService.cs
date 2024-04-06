@@ -16,29 +16,35 @@ namespace ApplicationCore.Services
             this._mapper = mapper;
 			this._coursesRepo = coursesRepo;
         }
-        public void AddCourse(CourseDto course)
+        public void AddCourse(CreateCourseDto course)
 		{
 			var entity = _mapper.Map<Course>(course);
 			_coursesRepo.Insert(entity);
 			_coursesRepo.Save();
 		}
 
-		public IEnumerable<CourseDto> GetAllCourses()
+		public IEnumerable<CourseViewDto> GetAllCourses()
 		{
-			var entities = _coursesRepo.GetAll();
-			return _mapper.Map<IEnumerable<CourseDto>>(entities);
+			var entities = _coursesRepo.GetListBySpec(new CourseSpecs.All());
+			return _mapper.Map<IEnumerable<CourseViewDto>>(entities);
 		}
 
-		public CourseDto? GetCourseById(int courseId)
+		public CourseViewDto? GetCourseById(int courseId)
 		{
-			var entity = _coursesRepo.GetByID(courseId);
+			var entity = _coursesRepo.GetItemBySpec(new CourseSpecs.ById(courseId));
 			if (entity == null) return null;
-			return _mapper.Map<CourseDto>(entity);
+			return _mapper.Map<CourseViewDto>(entity);
 		}
 
 		public IEnumerable<CourseDto> GetCoursesByStudent(int studentId)
 		{
 			var entities = _coursesRepo.GetListBySpec(new CourseSpecs.ByStudent(studentId));
+			return _mapper.Map<IEnumerable<CourseDto>>(entities);
+		}
+
+		public IEnumerable<CourseDto> GetCoursesByTeacher(int teacherId)
+		{
+			var entities = _coursesRepo.GetListBySpec(new CourseSpecs.ByTeacher(teacherId));
 			return _mapper.Map<IEnumerable<CourseDto>>(entities);
 		}
 
