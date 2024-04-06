@@ -1,8 +1,10 @@
 using ApplicationCore;
 using ApplicationCore.DTOs;
+using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
 using AutoMapper;
 using Infrastructure;
+using Microsoft.AspNetCore.Mvc;
 
 namespace WebApp
 {
@@ -62,12 +64,12 @@ namespace WebApp
 					return Results.NotFound(new { message = "Student not found" });
 				return Results.Json(student);
 			});
-			app.MapPost("/api/students/", async (CreateStudentDto student, IStudentService studentService, IMapper mapper) =>
+			app.MapPost("/api/students/", async ([FromBody] CreateStudentDto student, IStudentService studentService, IMapper mapper) =>
 			{
 				studentService.AddStudent(mapper.Map<StudentDto>(student));
 				return student;
 			});
-			app.MapPut("/api/students", async (StudentDto studentDto, IStudentService studentService) =>
+			app.MapPut("/api/students", async ([FromBody] StudentDto studentDto, IStudentService studentService) =>
 			{
 				var student = studentService.GetStudentById(studentDto.Id);
 				if (student == null)
@@ -97,12 +99,12 @@ namespace WebApp
 					return Results.NotFound(new { message = "Teacher not found" });
 				return Results.Json(teacher);
 			});
-			app.MapPost("/api/teachers/", async (CreateTeacherDto teacher, ITeacherService teacherService, IMapper mapper) =>
+			app.MapPost("/api/teachers/", async ([FromBody] CreateTeacherDto teacher, ITeacherService teacherService, IMapper mapper) =>
 			{
 				teacherService.AddTeacher(mapper.Map<TeacherDto>(teacher));
 				return teacher;
 			});
-			app.MapPut("/api/teachers", async (TeacherDto teacherDto, ITeacherService teacherService) =>
+			app.MapPut("/api/teachers", async ([FromBody] TeacherDto teacherDto, ITeacherService teacherService) =>
 			{
 				var teacher = teacherService.GetTeacherById(teacherDto.Id);
 				if (teacher == null)
@@ -132,12 +134,12 @@ namespace WebApp
 					return Results.NotFound(new { message = "Course not found" });
 				return Results.Json(course);
 			});
-			app.MapPost("/api/courses/", async (CreateCourseDto course, ICourseService courseService, IMapper mapper) =>
+			app.MapPost("/api/courses/", async ([FromBody] CreateCourseDto course, ICourseService courseService, IMapper mapper) =>
 			{
 				courseService.AddCourse(mapper.Map<CourseDto>(course));
 				return course;
 			});
-			app.MapPut("/api/courses", async (CourseDto courseDto, ICourseService courseService) =>
+			app.MapPut("/api/courses", async ([FromBody] CourseDto courseDto, ICourseService courseService) =>
 			{
 				var course = courseService.GetCourseById(courseDto.Id);
 				if (course == null)
@@ -152,6 +154,39 @@ namespace WebApp
 					return Results.NotFound(new { message = "Course not found" });
 				courseService.RemoveCourse(id);
 				return Results.Json(course);
+			});
+
+			// Course-Students
+			app.MapPost("/api/courses/{courseId:int}/students/{studentId:int}", async ([FromRoute] int courseId, [FromRoute] int studentId, [FromServices] ICourseStudentService courseStudentService, IMapper mapper) =>
+			{
+				var courseStudent = new CourseStudentDto() { CourseId = courseId, StudentId = studentId };
+				courseStudentService.AddCourseStudent(courseStudent);
+				return courseStudent;
+			});
+
+			app.MapGet("/api/courses/{courseId:int}/students", async (int courseId, IStudentService studentService) =>
+			{
+				var students = studentService.GetStudentsByCourse(courseId);
+				if (students.Count() == 0)
+					return Results.NotFound(new { message = "No items were found matching the given search criteria." });
+				return Results.Json(students);
+			});
+
+			app.MapGet("/api/students/{studentId:int}/courses", async (int studentId, ICourseService courseService) =>
+			{
+				var courses = courseService.GetCoursesByStudent(studentId);
+				if (courses.Count() == 0)
+					return Results.NotFound(new { message = "No items were found matching the given search criteria." });
+				return Results.Json(courses);
+			});
+
+			app.MapDelete("/api/courses/{courseId:int}/students/{studentId:int}", async ([FromRoute] int courseId, [FromRoute] int studentId, [FromServices] ICourseStudentService courseStudentService) =>
+			{
+				var courseStudent = courseStudentService.GetCourseStudentByIds(courseId, studentId);
+				if (courseStudent == null)
+					return Results.NotFound(new { message = "No item waw found matching the given search criteria." });
+				courseStudentService.RemoveCourseStudent(courseStudent.Id);
+				return Results.Json(courseStudent);
 			});
 
 			app.Run();

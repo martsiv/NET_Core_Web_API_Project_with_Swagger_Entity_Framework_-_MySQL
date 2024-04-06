@@ -5,18 +5,11 @@ namespace ApplicationCore.Specifications
 {
 	public static class StudentSpecs
 	{
-		public class ByGroup : Specification<Student>
+		public class ByCourse : Specification<Student>
 		{
-            public ByGroup(string groupName)
-            {
-				Query.Where(x => x.GroupName == groupName);
-			}
-		}
-		public class OlderThanDate : Specification<Student>
-		{
-			public OlderThanDate(DateTime date)
+			public ByCourse(int courseId)
 			{
-				Query.Where(x => x.BirthDate < date);
+				Query.Where(x => x.CoursesStudents.Any(y => y.CourseId == courseId));
 			}
 		}
 	}

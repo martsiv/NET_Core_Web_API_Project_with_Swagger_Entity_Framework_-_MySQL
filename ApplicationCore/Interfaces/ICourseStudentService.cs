@@ -9,5 +9,6 @@ namespace ApplicationCore.Interfaces
 		void UpdateCourseStudent(int courseStudentId, CourseStudentDto courseStudent);
 		IEnumerable<CourseStudentDto> GetAllCourseStudent();
 		CourseStudentDto? GetCourseStudentById(int courseStudentId);
+		CourseStudentDto? GetCourseStudentByIds(int courseId, int studentId);
 	}
 }

@@ -14,6 +14,7 @@ namespace ApplicationCore.Mapping
 			CreateMap<CreateStudentDto, StudentDto>();
 			CreateMap<Course, CourseDto>().ReverseMap();
 			CreateMap<CreateCourseDto, CourseDto>();
+			CreateMap<CourseStudent, CourseStudentDto>().ReverseMap();
 		}
     }
 }

@@ -16,6 +16,7 @@ namespace ApplicationCore
 			services.AddScoped<ICourseService, CourseService>();
 			services.AddScoped<IStudentService, StudentService>();
 			services.AddScoped<ITeacherService, TeacherService>();
+			services.AddScoped<ICourseStudentService, CourseStudentService>();
 		}
 	}
 }

@@ -8,6 +8,7 @@ namespace ApplicationCore.Interfaces
 		void RemoveStudent(int studentId);
 		void UpdateStudent(int studentId, StudentDto student);
 		IEnumerable<StudentDto> GetAllStudents();
+		IEnumerable<StudentDto> GetStudentsByCourse(int courseId);
 		StudentDto? GetStudentById(int studentId);
 	}
 }

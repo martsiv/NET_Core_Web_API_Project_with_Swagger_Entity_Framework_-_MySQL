@@ -1,6 +1,7 @@
 ﻿using ApplicationCore.DTOs;
 using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
+using ApplicationCore.Specifications;
 using AutoMapper;
 
 namespace ApplicationCore.Services
@@ -32,6 +33,12 @@ namespace ApplicationCore.Services
 		{
 			var entity = _courseStudentRepo.GetByID(courseStudentId);
 			if (entity == null) return null;
+			return _mapper.Map<CourseStudentDto>(entity);
+		}
+
+		CourseStudentDto? ICourseStudentService.GetCourseStudentByIds(int courseId, int studentId)
+		{
+			var entity = _courseStudentRepo.GetItemBySpec(new CourseStudentSpecs.ByCourseAndStudent(courseId, studentId));
 			return _mapper.Map<CourseStudentDto>(entity);
 		}
 
