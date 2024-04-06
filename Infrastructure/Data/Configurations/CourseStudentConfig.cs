@@ -10,6 +10,7 @@ namespace Infrastructure.Data.Configurations
 		{
 			builder.HasKey(x => x.Id);
 			builder.ToTable("CoursesStudents");
+			builder.HasAlternateKey(x => new { x.StudentId, x.CourseId });
 		}
 	}
 }

@@ -1,6 +1,5 @@
 using ApplicationCore;
 using ApplicationCore.DTOs;
-using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
 using AutoMapper;
 using Infrastructure;
@@ -30,6 +29,8 @@ namespace WebApp
 
 			// auto mapper configuration for Business logic
 			builder.Services.AddAutoMapper();
+			// fluent validators configuration
+			builder.Services.AddFluentValidator();
 
 			// add custom servies from Business logic
 			builder.Services.AddCustomServices();

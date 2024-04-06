@@ -1,5 +1,7 @@
 ﻿using ApplicationCore.Interfaces;
 using ApplicationCore.Services;
+using FluentValidation;
+using ApplicationCore.Validators;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ApplicationCore
@@ -17,6 +19,11 @@ namespace ApplicationCore
 			services.AddScoped<IStudentService, StudentService>();
 			services.AddScoped<ITeacherService, TeacherService>();
 			services.AddScoped<ICourseStudentService, CourseStudentService>();
+		}
+
+		public static void AddFluentValidator(this IServiceCollection services)
+		{
+			services.AddValidatorsFromAssemblies(AppDomain.CurrentDomain.GetAssemblies());
 		}
 	}
 }

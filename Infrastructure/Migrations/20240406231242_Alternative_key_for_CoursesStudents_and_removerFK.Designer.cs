@@ -4,6 +4,7 @@ using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    partial class ApplicationContextModelSnapshot : ModelSnapshot
+    [Migration("20240406231242_Alternative_key_for_CoursesStudents_and_removerFK")]
+    partial class Alternative_key_for_CoursesStudents_and_removerFK
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -79,10 +82,6 @@ namespace Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasAlternateKey("StudentId", "CourseId");
-
-                    b.HasIndex("CourseId");
 
                     b.ToTable("CoursesStudents", (string)null);
 
@@ -249,35 +248,6 @@ namespace Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Teacher");
-                });
-
-            modelBuilder.Entity("ApplicationCore.Entities.CourseStudent", b =>
-                {
-                    b.HasOne("ApplicationCore.Entities.Course", "Course")
-                        .WithMany("CoursesStudents")
-                        .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ApplicationCore.Entities.Student", "Student")
-                        .WithMany("CoursesStudents")
-                        .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Course");
-
-                    b.Navigation("Student");
-                });
-
-            modelBuilder.Entity("ApplicationCore.Entities.Course", b =>
-                {
-                    b.Navigation("CoursesStudents");
-                });
-
-            modelBuilder.Entity("ApplicationCore.Entities.Student", b =>
-                {
-                    b.Navigation("CoursesStudents");
                 });
 
             modelBuilder.Entity("ApplicationCore.Entities.Teacher", b =>

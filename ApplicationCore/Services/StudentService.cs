@@ -3,6 +3,7 @@ using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
 using ApplicationCore.Specifications;
 using AutoMapper;
+using FluentValidation;
 
 namespace ApplicationCore.Services
 {
@@ -10,14 +11,22 @@ namespace ApplicationCore.Services
 	{
 		private readonly IMapper _mapper;
 		private readonly IRepository<Student> _studentsRepo;
-        public StudentService(IMapper mapper,
-							IRepository<Student> studentRepo)
+		private readonly IValidator<CreateStudentDto> _createValidator;
+		private readonly IValidator<StudentDto> _editValidator;
+		public StudentService(IMapper mapper,
+							IRepository<Student> studentRepo,
+							IValidator<StudentDto> editValidator,
+							IValidator<CreateStudentDto> createValidator)
 		{
 			this._mapper = mapper;
 			this._studentsRepo = studentRepo;
+			this._createValidator = createValidator;
+			this._editValidator = editValidator;
 		}
 		public void AddStudent(CreateStudentDto student)
 		{
+			_createValidator.ValidateAndThrow(student);
+
 			var entity = _mapper.Map<Student>(student);
 			_studentsRepo.Insert(entity);
 			_studentsRepo.Save();
@@ -54,6 +63,8 @@ namespace ApplicationCore.Services
 
 		public void UpdateStudent(int studentId, StudentDto student)
 		{
+			_editValidator.ValidateAndThrow(student);
+
 			var existingEntity = _studentsRepo.GetByID(studentId);
 			if (existingEntity != null)
 			{
