@@ -4,6 +4,7 @@ using ApplicationCore.Interfaces;
 using AutoMapper;
 using Infrastructure;
 using Microsoft.AspNetCore.Mvc;
+using WebApp.Logger;
 
 namespace WebApp
 {
@@ -23,23 +24,22 @@ namespace WebApp
 			builder.Services.AddDbContext(connStr);
 			builder.Services.AddRepositories();
 
+			// Add file logger
+			builder.Logging.AddFile(Path.Combine(Directory.GetCurrentDirectory(), "logger.txt"));
+
 			// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 			builder.Services.AddEndpointsApiExplorer();
 			builder.Services.AddSwaggerGen();
 
-			// auto mapper configuration for Business logic
+			// Auto mapper configuration for Business logic
 			builder.Services.AddAutoMapper();
-			// fluent validators configuration
+			// Fluent validators configuration
 			builder.Services.AddFluentValidator();
 
-			// add custom servies from Business logic
+			// Add custom servies from Business logic
 			builder.Services.AddCustomServices();
 
 			var app = builder.Build();
-
-			// Create logger
-			ILoggerFactory loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
-			ILogger logger = loggerFactory.CreateLogger<Program>();
 
 			// Configure the HTTP request pipeline.
 			if (app.Environment.IsDevelopment())
@@ -68,7 +68,7 @@ namespace WebApp
 			app.MapPost("/api/students/", async ([FromBody] CreateStudentDto student, IStudentService studentService) =>
 			{
 				studentService.AddStudent(student);
-				return student;
+				return Results.Ok();
 			});
 			app.MapPut("/api/students", async ([FromBody] StudentDto studentDto, IStudentService studentService) =>
 			{
@@ -103,7 +103,7 @@ namespace WebApp
 			app.MapPost("/api/teachers/", async ([FromBody] CreateTeacherDto teacher, ITeacherService teacherService) =>
 			{
 				teacherService.AddTeacher(teacher);
-				return teacher;
+				return Results.Ok();
 			});
 			app.MapPut("/api/teachers", async ([FromBody] TeacherDto teacherDto, ITeacherService teacherService) =>
 			{
@@ -138,7 +138,7 @@ namespace WebApp
 			app.MapPost("/api/courses/", async ([FromBody] CreateCourseDto course, ICourseService courseService) =>
 			{
 				courseService.AddCourse(course);
-				return course;
+				return Results.Ok();
 			});
 			app.MapPut("/api/courses", async ([FromBody] CourseDto courseDto, ICourseService courseService) =>
 			{
@@ -192,7 +192,7 @@ namespace WebApp
 			{
 				var courseStudent = new CourseStudentDto() { CourseId = courseId, StudentId = studentId };
 				courseStudentService.AddCourseStudent(courseStudent);
-				return courseStudent;
+				return Results.Ok();
 			});
 
 			app.MapDelete("/api/courses/{courseId:int}/students/{studentId:int}", async ([FromRoute] int courseId, [FromRoute] int studentId, [FromServices] ICourseStudentService courseStudentService) =>
