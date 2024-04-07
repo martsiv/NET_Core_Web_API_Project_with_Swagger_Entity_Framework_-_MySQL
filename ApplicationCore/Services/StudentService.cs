@@ -65,7 +65,7 @@ namespace ApplicationCore.Services
 			return _mapper.Map<IEnumerable<StudentViewDto>>(entities);
 		}
 
-		public StudentViewDto? GetStudentById(int studentId)
+		public StudentViewDto GetStudentById(int studentId)
 		{
 			if (studentId < 0) throw new HttpException("Id can not be negative.", HttpStatusCode.BadRequest);
 
@@ -133,6 +133,121 @@ namespace ApplicationCore.Services
 			{
 				_studentsRepo.Update(existingEntity);
 				_studentsRepo.Save();
+			}
+			catch
+			{
+				throw new HttpException("An error occurred while updating the database.", HttpStatusCode.BadRequest);
+			}
+		}
+
+		public async Task AddStudentAsync(CreateStudentDto student)
+		{
+			try
+			{
+				await _createValidator.ValidateAndThrowAsync(student);
+			}
+			catch (ValidationException ex)
+			{
+				string message = "Validation error occurred. ";
+				if (ex.Errors.Count() > 0)
+				{
+					foreach (var error in ex.Errors)
+						message += error.ToString();
+				}
+
+				throw new HttpException(message, HttpStatusCode.BadRequest);
+			}
+			catch (Exception)
+			{
+				throw new HttpException("An error occurred.", HttpStatusCode.InternalServerError);
+			}
+
+			var entity = _mapper.Map<Student>(student);
+			try
+			{
+				await _studentsRepo.InsertAsync(entity);
+				await _studentsRepo.SaveAsync();
+			}
+			catch
+			{
+				throw new HttpException("An error occurred while updating the database.", HttpStatusCode.BadRequest);
+			}
+		}
+
+		public async Task<IEnumerable<StudentViewDto>> GetAllStudentsAsync()
+		{
+			var entities = await _studentsRepo.GetListBySpecAsync(new StudentSpecs.All());
+			return _mapper.Map<IEnumerable<StudentViewDto>>(entities);
+		}
+
+		public async Task<StudentViewDto> GetStudentByIdAsync(int studentId)
+		{
+			if (studentId < 0) throw new HttpException("Id can not be negative.", HttpStatusCode.BadRequest);
+
+			var entity = await _studentsRepo.GetItemBySpecAsync(new StudentSpecs.ById(studentId));
+			if (entity == null) throw new HttpException("Student not found.", HttpStatusCode.NotFound);
+
+			return _mapper.Map<StudentViewDto>(entity);
+		}
+
+		public async Task<IEnumerable<StudentDto>> GetStudentsByCourseAsync(int courseId)
+		{
+			if (courseId < 0) throw new HttpException("Id can not be negative.", HttpStatusCode.BadRequest);
+
+			var entities = await _studentsRepo.GetListBySpecAsync(new StudentSpecs.ByCourse(courseId));
+			return _mapper.Map<IEnumerable<StudentDto>>(entities);
+		}
+
+		public async Task RemoveStudentAsync(int studentId)
+		{
+			if (studentId < 0) throw new HttpException("Id can not be negative.", HttpStatusCode.BadRequest);
+
+			var entity = await _studentsRepo.GetByIDAsync(studentId);
+			if (entity == null) throw new HttpException("Student not found.", HttpStatusCode.NotFound);
+
+			try
+			{
+				await _studentsRepo.DeleteAsync(entity);
+				await _studentsRepo.SaveAsync();
+			}
+			catch
+			{
+				throw new HttpException("An error occurred while updating the database.", HttpStatusCode.BadRequest);
+			}
+		}
+
+		public async Task UpdateStudentAsync(int studentId, StudentDto student)
+		{
+			if (studentId < 0) throw new HttpException("Id can not be negative.", HttpStatusCode.BadRequest);
+
+			try
+			{
+				await _editValidator.ValidateAndThrowAsync(student);
+			}
+			catch (ValidationException ex)
+			{
+				string message = "Validation error occurred. ";
+				if (ex.Errors.Count() > 0)
+				{
+					foreach (var error in ex.Errors)
+						message += error.ToString();
+				}
+
+				throw new HttpException(message, HttpStatusCode.BadRequest);
+			}
+			catch (Exception)
+			{
+				throw new HttpException("An error occurred.", HttpStatusCode.InternalServerError);
+			}
+
+			var existingEntity = await _studentsRepo.GetByIDAsync(studentId);
+			if (existingEntity == null) throw new HttpException("Student not found.", HttpStatusCode.NotFound);
+
+			_mapper.Map(student, existingEntity);
+			try
+			{
+				_studentsRepo.Update(existingEntity);
+				await _studentsRepo.SaveAsync();
 			}
 			catch
 			{

@@ -38,7 +38,7 @@ namespace ApplicationCore.Services
 			return _mapper.Map<IEnumerable<CourseStudentDto>>(entities);
 		}
 
-		public CourseStudentDto? GetCourseStudentById(int courseStudentId)
+		public CourseStudentDto GetCourseStudentById(int courseStudentId)
 		{
 			if (courseStudentId < 0) throw new HttpException("Id can not be negative.", HttpStatusCode.BadRequest);
 
@@ -48,7 +48,7 @@ namespace ApplicationCore.Services
 			return _mapper.Map<CourseStudentDto>(entity);
 		}
 
-		CourseStudentDto? ICourseStudentService.GetCourseStudentByIds(int courseId, int studentId)
+		CourseStudentDto ICourseStudentService.GetCourseStudentByIds(int courseId, int studentId)
 		{
 			if (courseId < 0 || studentId < 0) throw new HttpException("Id can not be negative.", HttpStatusCode.BadRequest);
 
@@ -89,6 +89,83 @@ namespace ApplicationCore.Services
 			{
 				_courseStudentRepo.Update(existingEntity);
 				_courseStudentRepo.Save();
+			}
+			catch
+			{
+				throw new HttpException("An error occurred while updating the database.", HttpStatusCode.BadRequest);
+			}
+		}
+
+		public async Task AddCourseStudentAsync(CourseStudentDto courseStudent)
+		{
+			var entity = _mapper.Map<CourseStudent>(courseStudent);
+			try
+			{
+				await _courseStudentRepo.InsertAsync(entity);
+				await _courseStudentRepo.SaveAsync();
+			}
+			catch
+			{
+				throw new HttpException("An error occurred while updating the database.", HttpStatusCode.BadRequest);
+			}
+		}
+
+		public async Task<IEnumerable<CourseStudentDto>> GetAllCourseStudentAsync()
+		{
+			var entities = await _courseStudentRepo.GetAllAsync();
+			return _mapper.Map<IEnumerable<CourseStudentDto>>(entities);
+		}
+
+		public async Task<CourseStudentDto> GetCourseStudentByIdAsync(int courseStudentId)
+		{
+			if (courseStudentId < 0) throw new HttpException("Id can not be negative.", HttpStatusCode.BadRequest);
+
+			var entity = await _courseStudentRepo.GetByIDAsync(courseStudentId);
+			if (entity == null) throw new HttpException("CourseStudent record not found.", HttpStatusCode.NotFound);
+
+			return _mapper.Map<CourseStudentDto>(entity);
+		}
+
+		public async Task<CourseStudentDto> GetCourseStudentByIdsAsync(int courseId, int studentId)
+		{
+			if (courseId < 0 || studentId < 0) throw new HttpException("Id can not be negative.", HttpStatusCode.BadRequest);
+
+			var entity = await _courseStudentRepo.GetItemBySpecAsync(new CourseStudentSpecs.ByCourseAndStudent(courseId, studentId));
+			if (entity == null) throw new HttpException("CourseStudent record not found.", HttpStatusCode.NotFound);
+
+			return _mapper.Map<CourseStudentDto>(entity);
+		}
+
+		public async Task RemoveCourseStudentAsync(int courseStudentId)
+		{
+			if (courseStudentId < 0) throw new HttpException("Id can not be negative.", HttpStatusCode.BadRequest);
+
+			var entity = await _courseStudentRepo.GetByIDAsync(courseStudentId);
+			if (entity == null) throw new HttpException("CourseStudent record not found.", HttpStatusCode.NotFound);
+
+			try
+			{
+				await _courseStudentRepo.DeleteAsync(entity);
+				await _courseStudentRepo.SaveAsync();
+			}
+			catch
+			{
+				throw new HttpException("An error occurred while updating the database.", HttpStatusCode.BadRequest);
+			}
+		}
+
+		public async Task UpdateCourseStudentAsync(int courseStudentId, CourseStudentDto courseStudent)
+		{
+			if (courseStudentId < 0) throw new HttpException("Id can not be negative.", HttpStatusCode.BadRequest);
+
+			var existingEntity = await _courseStudentRepo.GetByIDAsync(courseStudentId);
+			if (existingEntity == null) throw new HttpException("CourseStudent record not found.", HttpStatusCode.NotFound);
+
+			_mapper.Map(courseStudent, existingEntity);
+			try
+			{
+				_courseStudentRepo.Update(existingEntity);
+				await _courseStudentRepo.SaveAsync();
 			}
 			catch
 			{
