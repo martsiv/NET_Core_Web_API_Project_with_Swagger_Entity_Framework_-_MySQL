@@ -1,8 +1,10 @@
-﻿using ApplicationCore.DTOs;
+﻿using ApplicationCore.CustomException;
+using ApplicationCore.DTOs;
 using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
 using ApplicationCore.Specifications;
 using AutoMapper;
+using System.Net;
 
 namespace ApplicationCore.Services
 {
@@ -10,7 +12,7 @@ namespace ApplicationCore.Services
 	{
 		private readonly IMapper _mapper;
 		private readonly IRepository<CourseStudent> _courseStudentRepo;
-        public CourseStudentService(IMapper mapper,
+		public CourseStudentService(IMapper mapper,
 							IRepository<CourseStudent> courseStudentRepo)
 		{
 			this._mapper = mapper;
@@ -19,8 +21,15 @@ namespace ApplicationCore.Services
 		public void AddCourseStudent(CourseStudentDto courseStudent)
 		{
 			var entity = _mapper.Map<CourseStudent>(courseStudent);
-			_courseStudentRepo.Insert(entity);
-			_courseStudentRepo.Save();
+			try
+			{
+				_courseStudentRepo.Insert(entity);
+				_courseStudentRepo.Save();
+			}
+			catch
+			{
+				throw new HttpException("An error occurred while updating the database.", HttpStatusCode.BadRequest);
+			}
 		}
 
 		public IEnumerable<CourseStudentDto> GetAllCourseStudent()
@@ -31,35 +40,59 @@ namespace ApplicationCore.Services
 
 		public CourseStudentDto? GetCourseStudentById(int courseStudentId)
 		{
+			if (courseStudentId < 0) throw new HttpException("Id can not be negative.", HttpStatusCode.BadRequest);
+
 			var entity = _courseStudentRepo.GetByID(courseStudentId);
-			if (entity == null) return null;
+			if (entity == null) throw new HttpException("CourseStudent record not found.", HttpStatusCode.NotFound);
+
 			return _mapper.Map<CourseStudentDto>(entity);
 		}
 
 		CourseStudentDto? ICourseStudentService.GetCourseStudentByIds(int courseId, int studentId)
 		{
+			if (courseId < 0 || studentId < 0) throw new HttpException("Id can not be negative.", HttpStatusCode.BadRequest);
+
 			var entity = _courseStudentRepo.GetItemBySpec(new CourseStudentSpecs.ByCourseAndStudent(courseId, studentId));
+			if (entity == null) throw new HttpException("CourseStudent record not found.", HttpStatusCode.NotFound);
+
 			return _mapper.Map<CourseStudentDto>(entity);
 		}
 
 		public void RemoveCourseStudent(int courseStudentId)
 		{
+			if (courseStudentId < 0) throw new HttpException("Id can not be negative.", HttpStatusCode.BadRequest);
+
 			var entity = _courseStudentRepo.GetByID(courseStudentId);
-			if (entity != null)
+			if (entity == null) throw new HttpException("CourseStudent record not found.", HttpStatusCode.NotFound);
+
+			try
 			{
 				_courseStudentRepo.Delete(courseStudentId);
 				_courseStudentRepo.Save();
+			}
+			catch
+			{
+				throw new HttpException("An error occurred while updating the database.", HttpStatusCode.BadRequest);
 			}
 		}
 
 		public void UpdateCourseStudent(int courseStudentId, CourseStudentDto courseStudent)
 		{
+			if (courseStudentId < 0) throw new HttpException("Id can not be negative.", HttpStatusCode.BadRequest);
+
 			var existingEntity = _courseStudentRepo.GetByID(courseStudentId);
-			if (existingEntity != null)
+
+			if (existingEntity == null) throw new HttpException("Course not found.", HttpStatusCode.NotFound);
+
+			_mapper.Map(courseStudent, existingEntity);
+			try
 			{
-				_mapper.Map(courseStudent, existingEntity);
 				_courseStudentRepo.Update(existingEntity);
 				_courseStudentRepo.Save();
+			}
+			catch
+			{
+				throw new HttpException("An error occurred while updating the database.", HttpStatusCode.BadRequest);
 			}
 		}
 	}

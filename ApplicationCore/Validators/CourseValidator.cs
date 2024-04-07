@@ -13,6 +13,10 @@ namespace ApplicationCore.Validators
 			RuleFor(x => x.Id)
 				.NotEmpty()
 				.GreaterThanOrEqualTo(1);
+
+			RuleFor(x => x.TeacherId)
+				.NotEmpty()
+				.GreaterThanOrEqualTo(1);
 		}
 	}
 }

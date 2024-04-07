@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace Infrastructure.Data
 {
-	public class ApplicationContext : DbContext
+	internal class ApplicationContext : DbContext
 	{
 		public ApplicationContext(DbContextOptions<ApplicationContext> options)
 			: base(options) { }

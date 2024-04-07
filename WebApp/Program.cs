@@ -50,6 +50,9 @@ namespace WebApp
 
 			app.UseHttpsRedirection();
 
+			// Exeption handler
+			app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
+
 			app.UseAuthorization();
 
 			// Students
@@ -61,8 +64,6 @@ namespace WebApp
 			app.MapGet("/api/students/{id:int}", async (int id, IStudentService studentService) =>
 			{
 				var student = studentService.GetStudentById(id);
-				if (student == null)
-					return Results.NotFound(new { message = "Student not found" });
 				return Results.Json(student);
 			});
 			app.MapPost("/api/students/", async ([FromBody] CreateStudentDto student, IStudentService studentService) =>
@@ -73,16 +74,12 @@ namespace WebApp
 			app.MapPut("/api/students", async ([FromBody] StudentDto studentDto, IStudentService studentService) =>
 			{
 				var student = studentService.GetStudentById(studentDto.Id);
-				if (student == null)
-					return Results.NotFound(new { message = "Student not found" });
 				studentService.UpdateStudent(student.Id, studentDto);
 				return Results.Json(studentDto);
 			});
 			app.MapDelete("/api/students/{id:int}", async (int id, IStudentService studentService) =>
 			{
 				var student = studentService.GetStudentById(id);
-				if (student == null)
-					return Results.NotFound(new { message = "Student not found" });
 				studentService.RemoveStudent(id);
 				return Results.Json(student);
 			});
@@ -96,8 +93,6 @@ namespace WebApp
 			app.MapGet("/api/teachers/{id:int}", async (int id, ITeacherService teacherService) =>
 			{
 				var teacher = teacherService.GetTeacherById(id);
-				if (teacher == null)
-					return Results.NotFound(new { message = "Teacher not found" });
 				return Results.Json(teacher);
 			});
 			app.MapPost("/api/teachers/", async ([FromBody] CreateTeacherDto teacher, ITeacherService teacherService) =>
@@ -108,16 +103,12 @@ namespace WebApp
 			app.MapPut("/api/teachers", async ([FromBody] TeacherDto teacherDto, ITeacherService teacherService) =>
 			{
 				var teacher = teacherService.GetTeacherById(teacherDto.Id);
-				if (teacher == null)
-					return Results.NotFound(new { message = "Teacher not found" });
 				teacherService.UpdateTeacher(teacher.Id, teacherDto);
 				return Results.Json(teacherDto);
 			});
 			app.MapDelete("/api/teachers/{id:int}", async (int id, ITeacherService teacherService) =>
 			{
 				var teacher = teacherService.GetTeacherById(id);
-				if (teacher == null)
-					return Results.NotFound(new { message = "Teacher not found" });
 				teacherService.RemoveTeacher(id);
 				return Results.Json(teacher);
 			});
@@ -131,8 +122,6 @@ namespace WebApp
 			app.MapGet("/api/courses/{id:int}", async (int id, ICourseService courseService) =>
 			{
 				var course = courseService.GetCourseById(id);
-				if (course == null)
-					return Results.NotFound(new { message = "Course not found" });
 				return Results.Json(course);
 			});
 			app.MapPost("/api/courses/", async ([FromBody] CreateCourseDto course, ICourseService courseService) =>
@@ -143,16 +132,12 @@ namespace WebApp
 			app.MapPut("/api/courses", async ([FromBody] CourseDto courseDto, ICourseService courseService) =>
 			{
 				var course = courseService.GetCourseById(courseDto.Id);
-				if (course == null)
-					return Results.NotFound(new { message = "Course not found" });
 				courseService.UpdateCourse(course.Id, courseDto);
 				return Results.Json(courseDto);
 			});
 			app.MapDelete("/api/courses/{id:int}", async (int id, ICourseService courseService) =>
 			{
 				var course = courseService.GetCourseById(id);
-				if (course == null) 
-					return Results.NotFound(new { message = "Course not found" });
 				courseService.RemoveCourse(id);
 				return Results.Json(course);
 			});
@@ -198,8 +183,6 @@ namespace WebApp
 			app.MapDelete("/api/courses/{courseId:int}/students/{studentId:int}", async ([FromRoute] int courseId, [FromRoute] int studentId, [FromServices] ICourseStudentService courseStudentService) =>
 			{
 				var courseStudent = courseStudentService.GetCourseStudentByIds(courseId, studentId);
-				if (courseStudent == null)
-					return Results.NotFound(new { message = "No item waw found matching the given search criteria." });
 				courseStudentService.RemoveCourseStudent(courseStudent.Id);
 				return Results.Json(courseStudent);
 			});
