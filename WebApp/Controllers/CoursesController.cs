@@ -27,8 +27,8 @@ namespace WebApp.Controllers
 			return Ok(await _courseService.GetCourseByIdAsync(id));
 		}
 
-		[HttpGet("byStudent/{studentId:int}")]
-		public async Task<IActionResult> GetCoursesByStudent([FromRoute] int studentId)
+		[HttpGet("byStudent")]
+		public async Task<IActionResult> GetCoursesByStudent([FromQuery] int studentId)
 		{
 			var courses = await _courseService.GetCoursesByStudentAsync(studentId);
 			if (courses.Count() == 0)
@@ -36,8 +36,8 @@ namespace WebApp.Controllers
 			return Ok(courses);
 		}
 
-		[HttpGet("byTeacher/{teacherId:int}")]
-		public async Task<IActionResult> GetCoursesByTeacher([FromRoute] int teacherId)
+		[HttpGet("byTeacher")]
+		public async Task<IActionResult> GetCoursesByTeacher([FromQuery] int teacherId)
 		{
 			var courses = await _courseService.GetCoursesByTeacherAsync(teacherId);
 			if (courses.Count() == 0)
@@ -55,8 +55,7 @@ namespace WebApp.Controllers
 		[HttpPut]
 		public async Task<IActionResult> Edit([FromBody] CourseDto courseDto)
 		{
-			var course = _courseService.GetCourseByIdAsync(courseDto.Id);
-			await _courseService.UpdateCourseAsync(course.Id, courseDto);
+			await _courseService.UpdateCourseAsync(courseDto.Id, courseDto);
 			return Ok();
 		}
 

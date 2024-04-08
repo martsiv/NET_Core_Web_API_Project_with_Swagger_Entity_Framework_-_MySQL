@@ -46,8 +46,7 @@ namespace WebApp.Controllers
 		[HttpPut]
 		public async Task<IActionResult> Edit([FromBody] StudentDto studentDto)
 		{
-			var student = _studentService.GetStudentById(studentDto.Id);
-			await _studentService.UpdateStudentAsync(student.Id, studentDto);
+			await _studentService.UpdateStudentAsync(studentDto.Id, studentDto);
 			return Ok();
 		}
 
