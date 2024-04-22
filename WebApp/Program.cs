@@ -1,14 +1,9 @@
 using ApplicationCore;
-using ApplicationCore.DTOs;
-using ApplicationCore.Interfaces;
-using AutoMapper;
 using Infrastructure;
-using Microsoft.AspNetCore.Mvc;
-using WebApp.Logger;
 
 namespace WebApp
 {
-	public class Program
+    public class Program
 	{
 		public static void Main(string[] args)
 		{
@@ -24,13 +19,24 @@ namespace WebApp
 			builder.Services.AddAuthorization();
 
 			builder.Services.AddDbContext(connStr);
-			builder.Services.AddRepositories();
+            builder.Services.AddRepositories();
 
-			// Add file logger
-			builder.Logging.AddFile(Path.Combine(Directory.GetCurrentDirectory(), "logger.txt"));
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAllOrigins",
+                    builder =>
+                    {
+                        builder.AllowAnyOrigin()
+                               .AllowAnyMethod()
+                               .AllowAnyHeader();
+                    });
+            });
 
-			// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-			builder.Services.AddEndpointsApiExplorer();
+            // Add file logger
+            //builder.Logging.AddFile(Path.Combine(Directory.GetCurrentDirectory(), "logger.txt"));
+
+            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+            builder.Services.AddEndpointsApiExplorer();
 			builder.Services.AddSwaggerGen();
 
 			// Auto mapper configuration for Business logic
@@ -43,19 +49,23 @@ namespace WebApp
 
 			var app = builder.Build();
 
-			// Configure the HTTP request pipeline.
-			if (app.Environment.IsDevelopment())
-			{
-				app.UseSwagger();
-				app.UseSwaggerUI();
-			}
+            // Configure the HTTP request pipeline.
+            //if (app.Environment.IsDevelopment())
+            //{
+            //	app.UseSwagger();
+            //	app.UseSwaggerUI();
+            //}
+            app.UseSwagger();
+			app.UseSwaggerUI();
 
 			app.UseHttpsRedirection();
+
+            app.UseCors(builder => builder.AllowAnyOrigin());
 
 			// Exeption handler
 			app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
 
-			app.UseAuthorization();
+            app.UseAuthorization();
 
 			app.MapControllers();
 
