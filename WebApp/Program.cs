@@ -10,7 +10,7 @@ namespace WebApp
 			var builder = WebApplication.CreateBuilder(args);
 
 			// Connection string from secrets
-			builder.Configuration.AddJsonFile("secrets.json", optional: true);
+			//builder.Configuration.AddJsonFile("secrets.json", optional: true);
 			string connStr = builder.Configuration.GetConnectionString("DefaultConnection")!;
 
 			builder.Services.AddControllers();
