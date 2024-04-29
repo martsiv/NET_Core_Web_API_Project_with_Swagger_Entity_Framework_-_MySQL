@@ -60,7 +60,8 @@ namespace WebApp
 
 			app.UseHttpsRedirection();
 
-            app.UseCors(builder => builder.AllowAnyOrigin());
+            app.UseCors(builder => 
+				builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
 			// Exeption handler
 			app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
