@@ -39,21 +39,21 @@ namespace WebApp.Controllers
 		[HttpPost]
 		public async Task<IActionResult> Create([FromBody] CreateStudentDto student)
 		{
-			await _studentService.AddStudentAsync(student);
+			_studentService.AddStudent(student);
 			return Ok();
 		}
 
 		[HttpPut]
 		public async Task<IActionResult> Edit([FromBody] StudentDto studentDto)
 		{
-			await _studentService.UpdateStudentAsync(studentDto.Id, studentDto);
+			_studentService.UpdateStudent(studentDto.Id, studentDto);
 			return Ok();
 		}
 
 		[HttpDelete("{id:int}")]
 		public async Task<IActionResult> Delete([FromRoute] int id)
 		{
-			await _studentService.RemoveStudentAsync(id);
+			_studentService.RemoveStudent(id);
 			return Ok();
 		}
 	}

@@ -31,7 +31,7 @@ namespace WebApp.Controllers
 		public async Task<IActionResult> PostCourseStudent([FromQuery] int courseId, [FromQuery] int studentId)
 		{
 			var courseStudent = new CourseStudentDto() { CourseId = courseId, StudentId = studentId };
-			await _courseStudentService.AddCourseStudentAsync(courseStudent);
+			_courseStudentService.AddCourseStudent(courseStudent);
 			return Ok();
 		}
 
@@ -39,7 +39,7 @@ namespace WebApp.Controllers
 		public async Task<IActionResult> DeleteCourseStudent([FromQuery] int courseId, [FromQuery] int studentId)
 		{
 			var courseStudent = await _courseStudentService.GetCourseStudentByIdsAsync(courseId, studentId);
-			await _courseStudentService.RemoveCourseStudentAsync(courseStudent.Id);
+			_courseStudentService.RemoveCourseStudent(courseStudent.Id);
 			return Ok(courseStudent);
 		}
 	}
