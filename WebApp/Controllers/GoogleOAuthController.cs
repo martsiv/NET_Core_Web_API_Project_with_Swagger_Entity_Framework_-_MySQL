@@ -2,8 +2,10 @@
 using ApplicationCore.Helpers;
 using ApplicationCore.Interfaces;
 using Azure.Core;
+using Google.Apis.Auth.AspNetCore3;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Calendar.v3;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 
@@ -19,17 +21,26 @@ namespace WebApp.Controllers
         private readonly IOAuthService _oAuthService;
         private readonly IGoogleCalendarService _googleCalendarService;
         private readonly IConfiguration _configuration;
-        private const string RedirectUrl = "https://localhost:7159/api/GoogleOAuth/Code"; // Action wich auth server calls with "Authorization Code" after authentification
+        private string RedirectUrl { get; init; } // Action wich auth server calls with "Authorization Code" after authentification
         //private const string GoogleCallendarScope = "https://www.googleapis.com/auth/calendar"; // View and edit all your calendars
         //private const string GoogleCallendarScope = "https://www.googleapis.com/auth/calendar.events"; // View and edit events on all your calendars
-        private string GoogleCallendarScope = CalendarService.Scope.CalendarEvents;
+        private const string GoogleCallendarScope = CalendarService.ScopeConstants.CalendarEvents;
         private const string PkceSessionKey = "codeVerifier";  // Key for save "Proof key/Code Verifier" value in UserSession
         private const string RememberMeSessionKey = "rememberMe";  // Key for save "Remember me" value in UserSession
 
         public GoogleOAuthController(IOAuthService oAuthService,
                                      IGoogleCalendarService googleCalendarService,
-                                     IConfiguration configuration)
+                                     IConfiguration configuration,
+                                     IWebHostEnvironment env)
         {
+            if (!env.IsDevelopment())
+            {
+                RedirectUrl = "https://university-web.azurewebsites.net/api/GoogleOAuth/Code";
+            }
+            else if (env.IsDevelopment())
+            {
+                RedirectUrl = "https://localhost:7159/api/GoogleOAuth/Code";
+            }
 
             _oAuthService = oAuthService;
             _googleCalendarService = googleCalendarService;
@@ -111,7 +122,8 @@ namespace WebApp.Controllers
         /// </summary>
         /// <param name="redirectUrl">Optional URL to redirect to after token refresh.</param>
         /// <returns>HTTP status indicating the result of token refresh.</returns>
-        [HttpPost]
+        [Authorize]
+        [HttpPost("RefreshToken")]
         public async Task<IActionResult> RefreshToken([FromQuery] string? redirectUrl = null)
         {
             bool rememberMe = true;
@@ -144,7 +156,7 @@ namespace WebApp.Controllers
                     {
                         HttpOnly = true,
                         Secure = true, // Customize according to your needs
-                        SameSite = SameSiteMode.Strict, // Customize according to your needs
+                        SameSite = SameSiteMode.None, // Customize according to your needs
                     };
 
                     Response.Cookies.Append("AccessToken", newTokenResponse.AccessToken, cookieOptions);
@@ -171,6 +183,7 @@ namespace WebApp.Controllers
         /// <param name="calendarId">ID of the calendar to add the event to.</param>
         /// <param name="timeZone">Time zone of the event.</param>
         /// <returns>HTTP status indicating the result of event creation.</returns>
+        [GoogleScopedAuthorize(CalendarService.ScopeConstants.CalendarEvents)]
         [HttpPost("CreateEvent")]
         public async Task<IActionResult> CreateEvent(string summary = "Lecture Schedule",
                                               string description = "Lecture for the upcoming semester.",
