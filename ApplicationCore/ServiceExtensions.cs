@@ -19,6 +19,8 @@ namespace ApplicationCore
 			services.AddScoped<IStudentService, StudentService>();
 			services.AddScoped<ITeacherService, TeacherService>();
 			services.AddScoped<ICourseStudentService, CourseStudentService>();
+			services.AddScoped<IGoogleCalendarService, GoogleCalendarService>();
+			services.AddScoped<IOAuthService, GoogleOAuthService>();
 		}
 
 		public static void AddFluentValidator(this IServiceCollection services)
