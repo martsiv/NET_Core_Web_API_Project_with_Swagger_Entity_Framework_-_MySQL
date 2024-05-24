@@ -62,7 +62,7 @@ namespace WebApp.Controllers
             HttpContext.Session.SetString(PkceSessionKey, codeVerifier);
             HttpContext.Session.SetString(RememberMeSessionKey, rememberMe.ToString());
 
-            var clientId = _configuration["ClientCredentials:ClientId"];
+            var clientId = _configuration["Google:ClientId"];
 
             var url = _oAuthService.GenerateOAuthRequestUrl(GoogleCallendarScope, RedirectUrl, codeChellange, clientId);
             return Redirect(url);
@@ -79,8 +79,8 @@ namespace WebApp.Controllers
             var codeVerifier = HttpContext.Session.GetString(PkceSessionKey);
 
             // Attention: the update token is provided only at the first user authorization!
-            var clientId = _configuration["ClientCredentials:ClientId"];
-            var clientSecret = _configuration["ClientCredentials:ClientSecret"];
+            var clientId = _configuration["Google:ClientId"];
+            var clientSecret = _configuration["Google:ClientSecret"];
 
             var tokenResult = await _oAuthService.ExchangeCodeOnTokenAsync(code, codeVerifier, RedirectUrl, clientId, clientSecret);
 
@@ -100,7 +100,7 @@ namespace WebApp.Controllers
                 {
                     HttpOnly = true,
                     Secure = true, // Adjust according to your needs
-                    SameSite = SameSiteMode.Strict, // Adjust according to your needs
+                    SameSite = SameSiteMode.None, // Adjust according to your needs
                 };
 
                 Response.Cookies.Append("AccessToken", tokenResult.AccessToken, cookieOptions);
@@ -122,7 +122,7 @@ namespace WebApp.Controllers
         /// </summary>
         /// <param name="redirectUrl">Optional URL to redirect to after token refresh.</param>
         /// <returns>HTTP status indicating the result of token refresh.</returns>
-        [Authorize]
+        //[Authorize]
         [HttpPost("RefreshToken")]
         public async Task<IActionResult> RefreshToken([FromQuery] string? redirectUrl = null)
         {
@@ -143,8 +143,8 @@ namespace WebApp.Controllers
                 return Unauthorized();
             }
 
-            var clientId = _configuration["ClientCredentials:ClientId"];
-            var clientSecret = _configuration["ClientCredentials:ClientSecret"];
+            var clientId = _configuration["Google:ClientId"];
+            var clientSecret = _configuration["Google:ClientSecret"];
 
             var newTokenResponse = await _oAuthService.RefreshTokenAsync(refreshToken, clientId, clientSecret);
             if (newTokenResponse != null)
@@ -183,7 +183,7 @@ namespace WebApp.Controllers
         /// <param name="calendarId">ID of the calendar to add the event to.</param>
         /// <param name="timeZone">Time zone of the event.</param>
         /// <returns>HTTP status indicating the result of event creation.</returns>
-        [GoogleScopedAuthorize(CalendarService.ScopeConstants.CalendarEvents)]
+        //[GoogleScopedAuthorize(CalendarService.ScopeConstants.CalendarEvents)]
         [HttpPost("CreateEvent")]
         public async Task<IActionResult> CreateEvent(string summary = "Lecture Schedule",
                                               string description = "Lecture for the upcoming semester.",
