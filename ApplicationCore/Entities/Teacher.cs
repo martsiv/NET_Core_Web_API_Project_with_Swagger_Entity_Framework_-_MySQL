@@ -8,5 +8,6 @@
         public DateTime BirthDate { get; set; }
         public int WorkExperienceFullYears { get; set; }
         public ICollection<Course> Courses { get; set; } = new HashSet<Course>();
-	}
+        public ICollection<LessonEvent> LessonEvents { get; set; } = new HashSet<LessonEvent>();
+    }
 }

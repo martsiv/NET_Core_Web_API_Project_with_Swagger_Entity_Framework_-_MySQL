@@ -1,4 +1,5 @@
-﻿using ApplicationCore.Interfaces;
+﻿using ApplicationCore.DTOs;
+using ApplicationCore.Interfaces;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Calendar.v3;
 using Google.Apis.Calendar.v3.Data;
@@ -9,8 +10,12 @@ namespace ApplicationCore.Services
     internal class GoogleCalendarService : IGoogleCalendarService
     {
         private readonly string ApplicationName = "OAuthUniversityApplication";
-
-        public async Task CreateEventAsync(string accessToken, string calendarId, string summary, string description, DateTime startDateTime, DateTime endDateTime, string timeZone)
+        private readonly ILessonEventService _lessonEventService;
+        public GoogleCalendarService(ILessonEventService lessonEventService)
+        {
+            _lessonEventService = lessonEventService;
+        }
+        public async Task AddEventToOwnCalendarAsync(string accessToken, LessonEventDto lessonEventDto)
         {
             var credential = GoogleCredential.FromAccessToken(accessToken);
             // Create Google Calendar API service.
@@ -22,22 +27,37 @@ namespace ApplicationCore.Services
 
             var newEvent = new Event()
             {
-                Summary = summary,
-                Description = description,
+                Summary = lessonEventDto.Summary,
+                Description = lessonEventDto.Description,
                 Start = new EventDateTime()
                 {
-                    DateTime = startDateTime,
-                    TimeZone = timeZone,
+                    DateTime = lessonEventDto.StartDateTime,
+                    TimeZone = lessonEventDto.TimeZone,
                 },
                 End = new EventDateTime()
                 {
-                    DateTime = endDateTime,
-                    TimeZone = timeZone,
+                    DateTime = lessonEventDto.EndDateTime,
+                    TimeZone = lessonEventDto.TimeZone,
                 }
             };
 
-            EventsResource.InsertRequest request = service.Events.Insert(newEvent, calendarId);
+            EventsResource.InsertRequest request = service.Events.Insert(newEvent, lessonEventDto.CalendarId);
             await request.ExecuteAsync();
+        }
+
+        public async Task CreateEventInDbAsync(string calendarId, string summary, string description, DateTime startDateTime, DateTime endDateTime, string timeZone, int teacherId)
+        {
+            var lessonEventCreateDto = new CreateLessonEventDto()
+            {
+                CalendarId = calendarId,
+                Summary = summary,
+                Description = description,
+                StartDateTime = startDateTime,
+                EndDateTime = endDateTime,
+                TimeZone = timeZone,
+                TeacherId = teacherId
+            };
+            _lessonEventService.AddLessonEvent(lessonEventCreateDto);
         }
     }
 }

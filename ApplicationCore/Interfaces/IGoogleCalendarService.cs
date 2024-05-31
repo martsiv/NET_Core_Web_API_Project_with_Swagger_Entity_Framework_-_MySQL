@@ -1,10 +1,10 @@
-﻿using OAuthTutorial.Helpers;
-using Google.Apis.Calendar.v3;
+﻿using ApplicationCore.DTOs;
 
 namespace ApplicationCore.Interfaces
 {
     public interface IGoogleCalendarService
     {
-        public Task CreateEventAsync(string accessToken, string calendarId, string summary, string description, DateTime startDateTime, DateTime endDateTime, string timeZone);
+        public Task CreateEventInDbAsync(string calendarId, string summary, string description, DateTime startDateTime, DateTime endDateTime, string timeZone, int teacherId);
+        public Task AddEventToOwnCalendarAsync(string accessToken, LessonEventDto lessonEventDto);
     }
 }

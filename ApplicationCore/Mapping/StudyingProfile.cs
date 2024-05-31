@@ -26,6 +26,11 @@ namespace ApplicationCore.Mapping
 			CreateMap<TeacherViewDto, TeacherDto>().ReverseMap();
 			CreateMap<StudentViewDto, StudentDto>().ReverseMap();
 			CreateMap<CourseViewDto, CourseDto>().ReverseMap();
+
+			CreateMap<LessonEvent, LessonEventViewDto>().ReverseMap();
+			CreateMap<CreateLessonEventDto, LessonEvent>();
+			CreateMap<LessonEvent, LessonEventDto>().ReverseMap();
+			CreateMap<LessonEventViewDto, LessonEventDto>().ReverseMap();
 		}
 	}
 }

@@ -1,13 +1,9 @@
-﻿using ApplicationCore.Entities;
-using ApplicationCore.Helpers;
+﻿using ApplicationCore.Helpers;
 using ApplicationCore.Interfaces;
-using Azure.Core;
-using Google.Apis.Auth.AspNetCore3;
-using Google.Apis.Auth.OAuth2;
 using Google.Apis.Calendar.v3;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using WebApp.Interfaces;
 
 namespace WebApp.Controllers
 {
@@ -16,11 +12,12 @@ namespace WebApp.Controllers
     /// </summary>
     [Route("api/[controller]")]
     [ApiController]
-    public class GoogleOAuthController : Controller
+    public class GoogleOAuthController : ControllerBase
     {
         private readonly IOAuthService _oAuthService;
         private readonly IGoogleCalendarService _googleCalendarService;
         private readonly IConfiguration _configuration;
+        private readonly ITokenStorageService _tokenStorageService;
         private string RedirectUrl { get; init; } // Action wich auth server calls with "Authorization Code" after authentification
         //private const string GoogleCallendarScope = "https://www.googleapis.com/auth/calendar"; // View and edit all your calendars
         //private const string GoogleCallendarScope = "https://www.googleapis.com/auth/calendar.events"; // View and edit events on all your calendars
@@ -29,8 +26,8 @@ namespace WebApp.Controllers
         private const string RememberMeSessionKey = "rememberMe";  // Key for save "Remember me" value in UserSession
 
         public GoogleOAuthController(IOAuthService oAuthService,
-                                     IGoogleCalendarService googleCalendarService,
                                      IConfiguration configuration,
+                                     ITokenStorageService tokenStorageService,
                                      IWebHostEnvironment env)
         {
             if (!env.IsDevelopment())
@@ -43,8 +40,8 @@ namespace WebApp.Controllers
             }
 
             _oAuthService = oAuthService;
-            _googleCalendarService = googleCalendarService;
             _configuration = configuration;
+            _tokenStorageService = tokenStorageService;
         }
 
         /// <summary>
@@ -92,27 +89,7 @@ namespace WebApp.Controllers
             bool rememberMe;
             bool.TryParse(HttpContext.Session.GetString(RememberMeSessionKey), out rememberMe);
 
-            if (rememberMe)
-            {
-                // Save tokens in long-term storage (e.g., HTTP-only cookies or secure storage)
-                // For example, saving in HTTP-only cookies
-                var cookieOptions = new CookieOptions
-                {
-                    HttpOnly = true,
-                    Secure = true, // Adjust according to your needs
-                    SameSite = SameSiteMode.None, // Adjust according to your needs
-                };
-
-                Response.Cookies.Append("AccessToken", tokenResult.AccessToken, cookieOptions);
-                Response.Cookies.Append("RefreshToken", tokenResult.RefreshToken, cookieOptions);
-            }
-            else
-            {
-                // Save tokens in user session
-                // For example, using ASP.NET Core sessions
-                HttpContext.Session.SetString("AccessToken", tokenResult.AccessToken);
-                HttpContext.Session.SetString("RefreshToken", tokenResult.RefreshToken);
-            }
+            _tokenStorageService.StoreTokens(tokenResult.AccessToken, rememberMe, HttpContext, tokenResult.RefreshToken);
 
             return Ok();
         }
@@ -148,76 +125,11 @@ namespace WebApp.Controllers
 
             var newTokenResponse = await _oAuthService.RefreshTokenAsync(refreshToken, clientId, clientSecret);
             if (newTokenResponse != null)
-            {
-                if (rememberMe)
-                {
-                    // Storing tokens in long-term storage (for example, HTTP-only cookies or secure storage)
-                    var cookieOptions = new CookieOptions
-                    {
-                        HttpOnly = true,
-                        Secure = true, // Customize according to your needs
-                        SameSite = SameSiteMode.None, // Customize according to your needs
-                    };
+                _tokenStorageService.StoreTokens(newTokenResponse.AccessToken, rememberMe, HttpContext);
 
-                    Response.Cookies.Append("AccessToken", newTokenResponse.AccessToken, cookieOptions);
-                }
-                else
-                {
-                    // Saving tokens in the user session
-                    // For example, using ASP.NET Core sessions
-                    HttpContext.Session.SetString("AccessToken", newTokenResponse.AccessToken);
-                }
-            }
             if (!redirectUrl.IsNullOrEmpty())
                 return Redirect(redirectUrl);
             return Ok();
         }
-
-        /// <summary>
-        /// Creates a new event in the Google Calendar.
-        /// </summary>
-        /// <param name="summary">Summary of the event.</param>
-        /// <param name="description">Description of the event.</param>
-        /// <param name="startDateTime">Start date and time of the event.</param>
-        /// <param name="endDateTime">End date and time of the event.</param>
-        /// <param name="calendarId">ID of the calendar to add the event to.</param>
-        /// <param name="timeZone">Time zone of the event.</param>
-        /// <returns>HTTP status indicating the result of event creation.</returns>
-        //[GoogleScopedAuthorize(CalendarService.ScopeConstants.CalendarEvents)]
-        [HttpPost("CreateEvent")]
-        public async Task<IActionResult> CreateEvent(string summary = "Lecture Schedule",
-                                              string description = "Lecture for the upcoming semester.",
-                                              DateTime? startDateTime = null,
-                                              DateTime? endDateTime = null,
-                                              string calendarId = "primary",
-                                              string timeZone = "America/Los_Angeles")
-        {
-            startDateTime ??= new DateTime(2024, 9, 1, 10, 0, 0);
-            endDateTime ??= new DateTime(2024, 9, 1, 12, 0, 0);
-
-            string accessToken;
-
-            // Checking whether the Access token is present in HTTP-only cookies
-            accessToken = Request.Cookies["AccessToken"];
-
-            // If the Access token is not found in the cookies, we will try to get it from the session
-            if (string.IsNullOrEmpty(accessToken))
-            {
-                accessToken = HttpContext.Session.GetString("AccessToken");
-            }
-
-            // Access token check
-            if (string.IsNullOrEmpty(accessToken))
-            {
-                return BadRequest("Access token is missing.");
-            }
-
-            // Calling the service method to create an event in Google Calendar using the received Access token
-            await _googleCalendarService.CreateEventAsync(accessToken, calendarId, summary, description, startDateTime.Value, endDateTime.Value, timeZone);
-
-            return Ok("Event created successfully.");
-        }
-
-
     }
 }
