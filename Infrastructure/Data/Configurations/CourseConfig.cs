@@ -10,9 +10,11 @@ namespace Infrastructure.Data.Configurations
 		{
 			builder.HasKey(x => x.Id);
 			builder.ToTable("Courses");
-			builder.HasAlternateKey(x => x.Name);
+			//builder.HasAlternateKey(x => x.Name);
 			builder.HasOne(x => x.Teacher).WithMany(x => x.Courses).HasForeignKey(x => x.TeacherId).IsRequired(true);
 			builder.HasMany(x => x.CoursesStudents).WithOne(x => x.Course).HasForeignKey(x => x.CourseId).IsRequired(true);
-		}
+
+            builder.HasIndex(x => x.Name).IsUnique();
+        }
 	}
 }

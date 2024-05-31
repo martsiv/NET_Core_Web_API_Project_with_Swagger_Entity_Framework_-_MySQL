@@ -48,21 +48,21 @@ namespace WebApp.Controllers
 		[HttpPost]
 		public async Task<IActionResult> Create([FromBody] CreateCourseDto course)
 		{
-			await _courseService.AddCourseAsync(course);
+			_courseService.AddCourse(course);
 			return Ok();
 		}
 
 		[HttpPut]
 		public async Task<IActionResult> Edit([FromBody] CourseDto courseDto)
 		{
-			await _courseService.UpdateCourseAsync(courseDto.Id, courseDto);
+			_courseService.UpdateCourse(courseDto.Id, courseDto);
 			return Ok();
 		}
 
 		[HttpDelete("{id:int}")]
 		public async Task<IActionResult> Delete([FromRoute] int id)
 		{
-			await _courseService.RemoveCourseAsync(id);
+			_courseService.RemoveCourse(id);
 			return Ok();
 		}
 	}

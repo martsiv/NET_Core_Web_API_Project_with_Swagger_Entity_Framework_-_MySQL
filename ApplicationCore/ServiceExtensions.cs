@@ -1,12 +1,11 @@
 ﻿using ApplicationCore.Interfaces;
 using ApplicationCore.Services;
 using FluentValidation;
-using ApplicationCore.Validators;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ApplicationCore
 {
-	public static class ServiceExtensions
+    public static class ServiceExtensions
 	{
 		public static void AddAutoMapper(this IServiceCollection services)
 		{
@@ -19,6 +18,9 @@ namespace ApplicationCore
 			services.AddScoped<IStudentService, StudentService>();
 			services.AddScoped<ITeacherService, TeacherService>();
 			services.AddScoped<ICourseStudentService, CourseStudentService>();
+			services.AddScoped<IGoogleCalendarService, GoogleCalendarService>();
+			services.AddScoped<IOAuthService, GoogleOAuthService>();
+			services.AddScoped<ILessonEventService, LessonEventService>();
 		}
 
 		public static void AddFluentValidator(this IServiceCollection services)
