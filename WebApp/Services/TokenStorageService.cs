@@ -19,7 +19,7 @@ namespace WebApp.Services
                 {
                     HttpOnly = true,
                     Secure = true,
-                    SameSite = SameSiteMode.Strict,
+                    SameSite = SameSiteMode.None,
                     Expires = DateTime.UtcNow.AddMinutes(30)
                 };
                 context.Response.Cookies.Append("AccessToken", accessToken, cookieOptions);

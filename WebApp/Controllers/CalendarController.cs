@@ -1,4 +1,5 @@
-﻿using ApplicationCore.Interfaces;
+﻿using ApplicationCore.DTOs;
+using ApplicationCore.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebApp.Controllers
@@ -58,17 +59,9 @@ namespace WebApp.Controllers
         /// <param name="course">Dto wich contains data to create entity to DB.</param>
         /// <returns>HTTP status</returns>
         [HttpPost]
-        //public async Task<IActionResult> Create([FromBody] CreateLessonEventDto lessonEventDto)
-        public async Task<IActionResult> Create(string summary = "Lecture Schedule",
-                                                string description = "Lecture for the upcoming semester.",
-                                                DateTime? startDateTime = null,
-                                                DateTime? endDateTime = null,
-                                                string calendarId = "primary",
-                                                string timeZone = "America/Los_Angeles",
-                                                int teacherId = 1)
+        public async Task<IActionResult> Create([FromBody] CreateLessonEventDto lessonEventDto)
         {
-            //_lessonEventService.AddLessonEvent(lessonEventDto);
-            await _googleCalendarService.CreateEventInDbAsync(calendarId, summary, description, startDateTime.Value, endDateTime.Value, timeZone, teacherId);
+            _lessonEventService.AddLessonEvent(lessonEventDto);
             return Ok();
         }
 

@@ -38,12 +38,13 @@ namespace WebApp
 
             services.AddCors(options =>
             {
-                options.AddPolicy("AllowAllOrigins",
+                options.AddPolicy("AllowSpecificOrigin",
                     builder =>
                     {
-                        builder.AllowAnyOrigin()
+                        builder.WithOrigins("http://localhost:3000")
                                .AllowAnyMethod()
-                               .AllowAnyHeader();
+                               .AllowAnyHeader()
+                               .AllowCredentials();
                     });
             });
 
@@ -83,8 +84,7 @@ namespace WebApp
 
             app.UseRouting();
 
-            app.UseCors(builder =>
-                builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+            app.UseCors("AllowSpecificOrigin");
 
             app.UseSession();
 
