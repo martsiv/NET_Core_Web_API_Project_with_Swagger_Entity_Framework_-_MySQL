@@ -5,16 +5,23 @@ namespace WebApp
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
             Configuration = configuration;
+            Env = env;
         }
 
         public IConfiguration Configuration { get; }
+        public IWebHostEnvironment Env { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // Determine the origin based on the environment
+            string allowedOrigin = Env.IsDevelopment()
+                ? Configuration["SpecificOrigin:DevelopmentOrigin"]
+                : Configuration["SpecificOrigin:ProductionOrigin"];
+
             // Sessions will be saved in a browser like a session identifier. But the full session's information will be saved on the server
             services.AddSession(options =>
             {
@@ -41,7 +48,7 @@ namespace WebApp
                 options.AddPolicy("AllowSpecificOrigin",
                     builder =>
                     {
-                        builder.WithOrigins("http://localhost:3000")
+                        builder.WithOrigins(allowedOrigin)
                                .AllowAnyMethod()
                                .AllowAnyHeader()
                                .AllowCredentials();

@@ -30,18 +30,13 @@ namespace WebApp.Controllers
                                      ITokenStorageService tokenStorageService,
                                      IWebHostEnvironment env)
         {
-            if (!env.IsDevelopment())
-            {
-                RedirectUrl = "https://university-web.azurewebsites.net/api/GoogleOAuth/Code";
-            }
-            else if (env.IsDevelopment())
-            {
-                RedirectUrl = "https://localhost:7159/api/GoogleOAuth/Code";
-            }
-
             _oAuthService = oAuthService;
             _configuration = configuration;
             _tokenStorageService = tokenStorageService;
+
+            RedirectUrl = env.IsDevelopment()
+                            ? _configuration["GoogleOAuth:RedirectUrlDevelopment"]
+                            : _configuration["GoogleOAuth:RedirectUrlProduction"];
         }
 
         /// <summary>
